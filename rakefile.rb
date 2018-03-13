@@ -1,6 +1,10 @@
 
 require "/vagrant/borgrake.rb"
 
+
+uboot_dir = '/home/vagrant/uboot-fslc'
+kernel_dir = '/home/vagrant/linux-fslc'
+
 def crossmake(target)
   arch = "arm"
   cross_compile = "arm-linux-gnueabihf-"
@@ -9,8 +13,7 @@ def crossmake(target)
   sh "make ARCH=#{arch} CROSS_COMPILE=#{cross_compile} -j#{cores} #{target}"
 end
 
-task :make_uboot do
-  uboot_dir = '/home/vagrant/uboot-fslc'
+task :uboot do
   uboot_config = 'mx6sabresd_defconfig'
   Dir.chdir(uboot_dir) do
     crossmake(uboot_config)
@@ -18,6 +21,15 @@ task :make_uboot do
   end
 end
 
-task :make_kernel do
+task :kernel do
+  kernel_config = 'imx_v7_defconfig'
+  Dir.chdir(kernel_dir) do
+    crossmake(kernel_config)
+    crossmake("zImage modules dtbs")
+  end
+end
 
+task :install => [:kernel, :uboot] do
+  install_dir = "/share/install"
+  FileUtils.mkdir_p install_dir
 end
