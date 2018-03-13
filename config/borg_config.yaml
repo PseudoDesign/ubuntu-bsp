@@ -1,6 +1,6 @@
 guest_info:
   # This is the name that the VirtualBox instance will use
-  name: "Anemoment Development Instance"
+  name: "Ubuntu iMX6 Development Instance"
   # System memory allocated to this instance
   memory: 8192
   # CPU threads available to this instance
@@ -10,7 +10,7 @@ guest_info:
   os: "debian"
   # The base box name as required by HashiCorp Atlas.
   # See https://atlas.hashicorp.com/
-  base_box: "bento/ubuntu-17.04"
+  base_box: "bento/ubuntu-16.04"
   # Use "true" if you want the VirtualBox GUI window to be generated.
   # Use "false" for a headless instance.
   # Note that you'll probably need to install a desktop environment if
@@ -22,11 +22,10 @@ guest_info:
   # for Xenial and later
   default_user: vagrant
   # The root folder of the project, relative to the Vagrantfile
-  project_root: anemoment-pi
+  project_root: ../
 features:
   # Package manager will use apt-get (on debian) to fetch packages
   - name: package_manager
     target: install gparted git build-essential libncurses5 wget u-boot-tools zlib1g-dev ncurses-dev \
             cmake libc-dev-armhf-cross pkg-config-arm-linux-gnueabihf build-essential checkinstall cmake \
             pkg-config lzop libc6 libstdc++6 debootstrap qemu-user-static binfmt-support arm-linux-gnueabihf
-            
