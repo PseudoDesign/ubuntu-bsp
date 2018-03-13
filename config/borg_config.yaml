@@ -30,9 +30,12 @@ features:
             cmake libc-dev-armhf-cross pkg-config-arm-linux-gnueabihf build-essential checkinstall
             pkg-config lzop libc6 libstdc++6 debootstrap qemu-user-static binfmt-support gcc-arm-linux-gnueabihf rake
 sources:
-  - name: uboot-imx
+  - name: uboot-fslc
     provider: git
     host: https://github.com/Freescale/u-boot-fslc.git
   - name: linux-fslc
     provider: git
     host: https://github.com/Freescale/linux-fslc.git
+  - name: ubuntu-core
+    provider: tar
+    host: /share/ubuntu-base-14.04-core-armhf.tar.gz
