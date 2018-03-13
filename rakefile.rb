@@ -31,5 +31,19 @@ end
 
 task :install => [:kernel, :uboot] do
   install_dir = "/share/install"
-  FileUtils.mkdir_p install_dir
+  binary_dir = File.join(install_dir, "binary")
+  FileUtils.mkdir_p binary_dir
+  # TODO: Verify .bin is the correct file to load
+  FileUtils.cp(
+    File.join(uboot_dir, "u-boot.bin"),
+    binary_dir
+  )
+  FileUtils.cp(
+    File.join(kernel_dir, "arch", "arm", "boot", "zImage"),
+    binary_dir
+  )
+  FileUtils.cp(
+    File.join(kernel_dir, "arch", "arm", "boot", "dts", "imx6dqscm-1gb-qwks-rev3-btwifi-fix-ldo.dtb"),
+    binary_dir
+  )
 end
