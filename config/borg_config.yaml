@@ -26,6 +26,13 @@ guest_info:
 features:
   # Package manager will use apt-get (on debian) to fetch packages
   - name: package_manager
-    target: gparted git build-essential libncurses5 wget u-boot-tools zlib1g-dev ncurses-dev \
-            cmake libc-dev-armhf-cross pkg-config-arm-linux-gnueabihf build-essential checkinstall \
-            pkg-config lzop libc6 libstdc++6 debootstrap qemu-user-static binfmt-support arm-linux-gnueabihf
+    target: gparted git build-essential libncurses5 wget u-boot-tools zlib1g-dev ncurses-dev
+            cmake libc-dev-armhf-cross pkg-config-arm-linux-gnueabihf build-essential checkinstall
+            pkg-config lzop libc6 libstdc++6 debootstrap qemu-user-static binfmt-support gcc-arm-linux-gnueabihf rake
+sources:
+  - name: uboot-imx
+    provider: git
+    host: https://github.com/Freescale/u-boot-fslc.git
+  - name: linux-fslc
+    provider: git
+    host: https://github.com/Freescale/linux-fslc.git
