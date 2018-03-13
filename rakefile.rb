@@ -55,4 +55,6 @@ task :install => [:kernel, :uboot] do
   sh "sudo cp -r #{ubuntu_rfs_dir}/* #{rfs_dir}"
   sh "sudo make -C #{kernel_dir} modules_install firmware_install \
       INSTALL_MOD_PATH=#{rfs_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- "
+  sh "sudo make -C #{kernel_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
+  headers_install INSTALL_HDR_PATH=#{rfs_dir}/usr  "
 end
