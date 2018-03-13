@@ -1,13 +1,23 @@
 
 require "/vagrant/borgrake.rb"
 
+def crossmake(target)
+  arch = "arm"
+  cross_compile = "arm-linux-gnueabihf-"
+  cores = "4"
+
+  sh "make ARCH=#{arch} CROSS_COMPILE=#{cross_compile} -j#{cores} #{target}"
+end
+
 task :make_uboot do
   uboot_dir = '/home/vagrant/uboot-fslc'
   uboot_config = 'mx6sabresd_defconfig'
-  arch = "arm"
-  cross_compile = "arm-linux-gnueabihf-"
   Dir.chdir(uboot_dir) do
-    sh "make ARCH=#{arch} CROSS_COMPILE=#{cross_compile} #{uboot_config}"
-    sh "make ARCH=#{arch} CROSS_COMPILE=#{cross_compile} -j4"
+    crossmake(uboot_config)
+    crossmake("")
   end
+end
+
+task :make_kernel do
+
 end
