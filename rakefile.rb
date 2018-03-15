@@ -11,6 +11,24 @@ install_dir = '/home/vagrant/install'
 binary_dir = File.join(install_dir, "binary")
 rfs_dir = File.join(install_dir, "media/rootfs")
 
+TMP_SD_FILE_NAME = "/home/vagrant/.tmpsd.img"
+
+PARTITION_INFO = [
+  {
+    partition_name: "boot",
+    partition_start_sector: 2048,
+    partition_length_sectors: (1024 * 1024 * 500)/512,
+    fdisk_type: "6", # FAT16
+    mkfs_command: "mkfs.vfat"
+  },
+  {
+    partition_name: "rootfs1",
+    partition_start_sector: 1028000,
+    partition_length_sectors: (1024 * 1024 * 4000)/512,
+    mkfs_command: "mkfs.ext3"
+  }
+]
+
 def crossmake(target)
   arch = "arm"
   cross_compile = "arm-linux-gnueabihf-"
@@ -38,6 +56,23 @@ end
 task :ubuntu => [:borg_update_sources]
 
 task :install => [:install_boot, :install_ubuntu, :install_kernel]
+
+task :sd_card => [:install] do
+  if File.exist?(TMP_SD_FILE_NAME)
+    `rm #{TMP_SD_FILE_NAME}`
+  end
+  BorgLib.create_image(TMP_SD_FILE_NAME, PARTITION_INFO)
+  BorgLib.mount_partitions(TMP_SD_FILE_NAME, PARTITION_INFO) do
+    `
+      sudo cp -r #{binary_dir}/* /var/.tmpmnt/boot
+      sudo cp -r #{rfs_dir}/* /var/.tmpmnt/rootfs1
+    `
+  end
+  `
+    mkdir -p /share/images
+    cp /home/vagrant/.tmpsd.img /share/images/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.img
+  `
+end
 
 task :install_ubuntu => [:ubuntu] do
   FileUtils.mkdir_p rfs_dir

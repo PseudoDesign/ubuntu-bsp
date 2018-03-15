@@ -28,7 +28,7 @@ features:
   - name: package_manager
     target: gparted git build-essential libncurses5 wget u-boot-tools zlib1g-dev ncurses-dev bc
             cmake libc-dev-armhf-cross pkg-config-arm-linux-gnueabihf build-essential checkinstall
-            pkg-config lzop libc6 libstdc++6 debootstrap qemu-user-static binfmt-support gcc-arm-linux-gnueabihf rake
+            pkg-config kpartx lzop libc6 libstdc++6 debootstrap qemu-user-static binfmt-support gcc-arm-linux-gnueabihf rake
 sources:
   - name: uboot-fslc
     provider: git
@@ -37,5 +37,5 @@ sources:
     provider: git
     host: https://github.com/Freescale/linux-fslc.git
   - name: ubuntu-core
-    provider: git
-    host: https://github.com/PseudoDesign/ubuntu-trusty-rootfs.git
+    provider: tar
+    host: /share/ubuntu-base-14.04-core-armhf.tar.gz
