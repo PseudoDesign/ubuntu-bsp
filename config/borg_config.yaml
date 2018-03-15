@@ -37,5 +37,5 @@ sources:
     provider: git
     host: https://github.com/Freescale/linux-fslc.git
   - name: ubuntu-core
-    provider: tar
-    host: /share/ubuntu-base-14.04-core-armhf.tar.gz
+    provider: git
+    host: https://github.com/PseudoDesign/ubuntu-trusty-rootfs.git
