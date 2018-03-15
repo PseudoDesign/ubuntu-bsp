@@ -7,6 +7,10 @@ kernel_dir = '/home/vagrant/linux-fslc'
 ubuntu_rfs_dir = '/home/vagrant/ubuntu-core'
 install_dir = '/home/vagrant/install'
 
+
+binary_dir = File.join(install_dir, "binary")
+rfs_dir = File.join(install_dir, "media/rootfs")
+
 def crossmake(target)
   arch = "arm"
   cross_compile = "arm-linux-gnueabihf-"
@@ -31,18 +35,30 @@ task :kernel do
   end
 end
 
-task :install => [:kernel, :uboot] do
-  # Create install dirs
-  binary_dir = File.join(install_dir, "binary")
-  rfs_dir = File.join(install_dir, "media/rootfs")
-  FileUtils.mkdir_p binary_dir
+task :ubuntu => [:borg_update_sources]
+
+task :install => [:install_boot, :install_ubuntu, :install_kernel]
+
+task :install_ubuntu => [:ubuntu] do
   FileUtils.mkdir_p rfs_dir
+  # Install Ubuntu
+  sh "sudo cp -r #{ubuntu_rfs_dir}/* #{rfs_dir}"
+end
+
+task :install_boot => [:uboot] do
+  # Create install dirs
+  FileUtils.mkdir_p binary_dir
   # TODO: Verify .bin is the correct file to load
   # Install uboot
   FileUtils.cp(
     File.join(uboot_dir, "u-boot.bin"),
     binary_dir
   )
+end
+
+task :install_kernel => [:kernel] do
+  FileUtils.mkdir_p binary_dir
+  FileUtils.mkdir_p rfs_dir
   # Install the kernel image
   FileUtils.cp(
     File.join(kernel_dir, "arch", "arm", "boot", "zImage"),
@@ -56,11 +72,10 @@ task :install => [:kernel, :uboot] do
     ),
     binary_dir
   )
-  # Install firmware
-  sh "sudo cp -r #{ubuntu_rfs_dir}/* #{rfs_dir}"
-  sh "sudo make -C #{kernel_dir} modules_install firmware_install \
-      INSTALL_MOD_PATH=#{rfs_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- "
-  # Install modules
+  # Install headers
   sh "sudo make -C #{kernel_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
   headers_install INSTALL_HDR_PATH=#{rfs_dir}/usr  "
+  # Install firmware
+  sh "sudo make -C #{kernel_dir} modules_install firmware_install \
+      INSTALL_MOD_PATH=#{rfs_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- "
 end
