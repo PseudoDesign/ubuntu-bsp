@@ -38,7 +38,7 @@ def crossmake(target)
 end
 
 task :uboot do
-  uboot_config = 'mx6sabresd_defconfig'
+  uboot_config = 'mx6ull_14x14_evk_defconfig'
   Dir.chdir(uboot_dir) do
     crossmake(uboot_config)
     crossmake("")
@@ -57,7 +57,7 @@ task :ubuntu => [:borg_update_sources]
 
 task :install => [:install_boot, :install_ubuntu, :install_kernel]
 
-task :sd_card => [:install] do
+task :sd_card do
   if File.exist?(TMP_SD_FILE_NAME)
     `rm #{TMP_SD_FILE_NAME}`
   end
@@ -68,6 +68,10 @@ task :sd_card => [:install] do
       sudo cp -r #{rfs_dir}/* /var/.tmpmnt/rootfs1
     `
   end
+  # Write uboot
+  `
+  dd conv=notrunc if=#{binary_dir}/u-boot-dtb.imx of=#{TMP_SD_FILE_NAME} bs=512 seek=2
+  `
   `
     mkdir -p /share/images
     cp /home/vagrant/.tmpsd.img /share/images/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.img
@@ -100,13 +104,8 @@ task :install_kernel => [:kernel] do
     binary_dir
   )
   # Install dts
-  FileUtils.cp(
-    File.join(
-      kernel_dir, "arch", "arm", "boot", "dts",
-      "imx6dqscm-1gb-qwks-rev3-btwifi-fix-ldo.dtb"
-    ),
-    binary_dir
-  )
+  dts = File.join(kernel_dir, "arch", "arm", "boot", "dts")
+  `cp #{dts}/imx6ull-14x14-evk*.dtb #{binary_dir}`
   # Install headers
   sh "sudo make -C #{kernel_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
   headers_install INSTALL_HDR_PATH=#{rfs_dir}/usr  "
