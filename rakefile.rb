@@ -90,7 +90,7 @@ task :install_boot => [:uboot] do
   # TODO: Verify .bin is the correct file to load
   # Install uboot
   FileUtils.cp(
-    File.join(uboot_dir, "u-boot.bin"),
+    File.join(uboot_dir, "u-boot-dtb.imx"),
     binary_dir
   )
 end
