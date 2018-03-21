@@ -4,7 +4,7 @@ require "/vagrant/borgrake.rb"
 
 uboot_dir = '/home/vagrant/uboot-fslc'
 kernel_dir = '/home/vagrant/linux-fslc'
-ubuntu_rfs_dir = '/home/vagrant/ubuntu-core'
+ubuntu_rfs_dir = '/home/vagrant/ubuntu'
 install_dir = '/home/vagrant/install'
 
 
@@ -53,7 +53,42 @@ task :kernel do
   end
 end
 
-task :ubuntu => [:borg_update_sources]
+task :ubuntu do
+  target = ubuntu_rfs_dir
+  distro = 'trusty'
+  # Install stage one of our rootfs
+ `
+  mkdir -p #{target}
+  sudo debootstrap --arch=armhf --foreign --include=ubuntu-keyring,apt-transport-https,ca-certificates,openssl #{distro} "#{target}" http://ports.ubuntu.com
+  sudo cp /usr/bin/qemu-arm-static #{target}/usr/bin
+  sudo cp /etc/resolv.conf #{target}/etc
+ `
+ # chroot into the rootfs dir, then run second stage
+bootstrap_script =
+"
+ set -v
+ export LC_ALL=C LANGUAGE=C LANG=C
+ /debootstrap/debootstrap --second-stage
+ echo \"deb http://ports.ubuntu.com/ubuntu-ports/ #{distro} main restricted universe multiverse\" > /etc/apt/sources.list
+ echo \"deb http://ports.ubuntu.com/ubuntu-ports/ #{distro}-updates main restricted universe multiverse\" >> /etc/apt/sources.list
+ echo \"deb http://ports.ubuntu.com/ubuntu-ports/ #{distro}-security main restricted universe multiverse\" >> /etc/apt/sources.list
+ apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 40976EAF437D05B5
+ apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 3B4FE6ACC0B21F32
+ apt-get update
+ apt-get upgrade -y
+ apt-get install -y vim
+"
+File.write(".bootstrap.sh", bootstrap_script)
+ `
+  sudo mv .bootstrap.sh #{target}
+  sudo chroot #{target} ./.bootstrap.sh
+ `
+ # Clean up qemu and resolv.conf
+ `
+  sudo rm #{target}/etc/resolv.conf
+  sudo rm #{target}/usr/bin/qemu-arm-static
+ `
+end
 
 task :install => [:install_boot, :install_ubuntu, :install_kernel]
 
