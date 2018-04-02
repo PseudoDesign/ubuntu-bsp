@@ -1,6 +1,6 @@
 guest_info:
   # This is the name that the VirtualBox instance will use
-  name: "Ubuntu iMX6 Development Instance"
+  name: "Ubuntu iMX6 Development Instance 2"
   # System memory allocated to this instance
   memory: 8192
   # CPU threads available to this instance
@@ -36,6 +36,3 @@ sources:
   - name: linux-fslc
     provider: git
     host: https://github.com/Freescale/linux-fslc.git
-  - name: ubuntu-core
-    provider: tar
-    host: /share/ubuntu-base-14.04-core-armhf.tar.gz
