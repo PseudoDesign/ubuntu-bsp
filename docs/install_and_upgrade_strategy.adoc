@@ -1,0 +1,52 @@
+== iMX6 Factory Programming and Software Upgrade Strategy
+
+=== Partition Table
+
+===== Bootloader Partition
+
+The EMMC Flash has a bootloader partition built in.  This partition is independent of the device's primary flash space.  The U-Boot binary can be burned directly into this section.
+
+===== Boot Partition
+
+This FAT formatted partition contains the Linux kernel binary (zImage), device tree binary (dtb), and boot script (boot.scr).
+
+===== RootFS Partitions 1 and 2
+
+These ext4 formatted partitions are used for the root file system.
+However, only one is in use at a time; the second is used during the software upgrade process.
+
+===== NVM Partition
+
+This ext4 formatted partition is used to store logs and settings that will persist through a software update.
+
+=== Factory Programming
+
+==== MFGTOOL
+
+Get screencaps
+
+==== Workflow
+
+* Boot board to MFGTOOL Linux image
+* Create four partitions
+* Copy U-Boot binary, Linux binary and device tree, rootfs tarball, and boot script to nvm partition
+* Write the U-Boot binary to the bootloader partition
+* Copy zImage, dtb, and boot.scr to the boot partition
+* Extract the rootfs tarball to the rootfs1 partition
+* Install serial number(s) and MAC address(es)
+* Remove files from nvm partition
+
+=== Software Upgrade
+
+==== Signed Images
+
+Detail image signing.
+
+==== Upgrade Process
+
+* Verify image signature
+* Extract new rootfs to unused rootfs partition
+* Modify boot.scr to boot with the alternate rootfs
+* Replace the kernel and device tree binary (if included)
+* Replace the bootloader (if necessary)
+* Reboot the system
