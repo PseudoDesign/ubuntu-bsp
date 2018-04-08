@@ -36,3 +36,4 @@ sources:
   - name: linux-fslc
     provider: git
     host: https://github.com/Freescale/linux-fslc.git
+    branch: 4.1-2.0.x-imx
