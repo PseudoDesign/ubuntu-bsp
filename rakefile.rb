@@ -6,7 +6,7 @@ uboot_dir = '/home/vagrant/uboot-fslc'
 kernel_dir = '/home/vagrant/linux-fslc'
 ubuntu_rfs_dir = '/home/vagrant/ubuntu'
 install_dir = '/home/vagrant/install'
-uboot_file = 'u-boot-dtb.bin'
+uboot_file = 'u-boot.imx'
 
 
 binary_dir = File.join(install_dir, "binary")
@@ -39,7 +39,7 @@ def crossmake(target)
 end
 
 task :uboot do
-  uboot_config = 'imx6qdl_icore_mmc_defconfig'
+  uboot_config = 'mx6dqscm_1gb_fix_qwks_rev2_defconfig'
   Dir.chdir(uboot_dir) do
     crossmake(uboot_config)
     crossmake("")
@@ -79,6 +79,16 @@ bootstrap_script =
  apt-get upgrade -y
  apt-get install -y vim
  passwd root
+ echo \"
+start on stopped rc RUNLEVEL=[2345] and (
+            not-container or
+            container CONTAINER=lxc or
+            container CONTAINER=lxc-libvirt)
+
+stop on runlevel [!2345]
+
+respawn
+exec /sbin/getty -L 115200 ttymxc0\" > /etc/init/tty1.conf
 "
 File.write(".bootstrap.sh", bootstrap_script)
  `
@@ -142,7 +152,7 @@ task :install_kernel => [:kernel] do
   )
   # Install dts
   dts = File.join(kernel_dir, "arch", "arm", "boot", "dts")
-  `cp #{dts}/imx6dqscm-1gb-qwks-rev2-wifi-fix-ldo.dts #{binary_dir}`
+  `cp #{dts}/imx6dqscm-1gb-qwks-rev2-fix-ldo.dtb #{binary_dir}`
   # Install headers
   sh "sudo make -C #{kernel_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
   headers_install INSTALL_HDR_PATH=#{rfs_dir}/usr  "
