@@ -39,7 +39,7 @@ def crossmake(target)
 end
 
 task :uboot do
-  uboot_config = 'mx6dqscm_1gb_fix_qwks_rev2_defconfig'
+  uboot_config = 'mx6ull_14x14_evk_defconfig'
   Dir.chdir(uboot_dir) do
     crossmake(uboot_config)
     crossmake("")
@@ -56,7 +56,7 @@ end
 
 task :ubuntu do
   target = ubuntu_rfs_dir
-  distro = 'trusty'
+  distro = 'xenial'
   # Install stage one of our rootfs
  `
   mkdir -p #{target}
@@ -79,16 +79,7 @@ bootstrap_script =
  apt-get upgrade -y
  apt-get install -y vim
  passwd root
- echo \"
-start on stopped rc RUNLEVEL=[2345] and (
-            not-container or
-            container CONTAINER=lxc or
-            container CONTAINER=lxc-libvirt)
-
-stop on runlevel [!2345]
-
-respawn
-exec /sbin/getty -L 115200 ttymxc0\" > /etc/init/tty1.conf
+ ln -s /lib/systemd/system/getty@.service getty@ttymxc0.service
 "
 File.write(".bootstrap.sh", bootstrap_script)
  `
@@ -152,7 +143,7 @@ task :install_kernel => [:kernel] do
   )
   # Install dts
   dts = File.join(kernel_dir, "arch", "arm", "boot", "dts")
-  `cp #{dts}/imx6dqscm-1gb-qwks-rev2-fix-ldo.dtb #{binary_dir}`
+   `cp #{dts}/imx6ull-14x14-evk*.dtb #{binary_dir}`
   # Install headers
   sh "sudo make -C #{kernel_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
   headers_install INSTALL_HDR_PATH=#{rfs_dir}/usr  "
