@@ -1,0 +1,63 @@
+= iMX6 Factory Programming and Software Upgrade Strategy
+:customer-name: Syncroness
+:project-name: Embedded Systems
+:document-number: 001-011-081
+:revision: A
+:executive-summary: This document provides a high-level description of the system configuration and install/update process for on-board iMX6 flash.
+
+
+=== Partition Table
+
+===== Bootloader Partition
+
+The EMMC Flash has a bootloader partition built in.  This partition is independent of the device's primary flash space.  The U-Boot binary can be burned directly into this section.
+
+===== Boot Partition
+
+This FAT formatted partition contains the Linux kernel binary (zImage), device tree binary (dtb), and boot script (boot.scr).
+
+===== RootFS Partitions 1 and 2
+
+These ext4 formatted partitions are used for the root file system.
+However, only one is in use at a time; the second is used during the software upgrade process.
+
+===== NVM Partition
+
+This ext4 formatted partition is used to store logs and settings that will persist through a software update.
+
+=== Factory Programming
+
+==== MFGTOOL
+
+The https://www.nxp.com/webapp/Download?colCode=IMX-L5.0.0-MFG-TOOL&appType=license&location=null&Parent_nodeId=1337637154535695831062&Parent_pageType=product&Parent_nodeId=1337637154535695831062&Parent_pageType=product[iMX6 MFG Tool] utilizes a USB-OTG interface to communicate with the iMX6 serial bootloader ROM.
+It is used to upload a Linux kernel into RAM, which in turn is used to configure the flash partitions and install the initial BSP.
+
+==== Workflow
+
+* Boot board to MFGTOOL Linux image
+* Create four partitions
+* Copy U-Boot binary, Linux binary and device tree, rootfs tarball, and boot script to nvm partition
+* Write the U-Boot binary to the bootloader partition
+* Copy zImage, dtb, and boot.scr to the boot partition
+* Extract the rootfs tarball to the rootfs1 partition
+* Install serial number(s) and MAC address(es)
+* Remove files from nvm partition
+
+=== Software Upgrade
+
+==== Signed Images
+
+System images are deployed as a tarball signed with a 4096-bit public/private key pair.
+By deploying the units with a public key, we can ensure only software signed by our private key can be installed by the application.
+
+Installation methods are numerous and application specific; any physical mechanism that can be used to transfer files to the system can be used to install updates.
+Syncroness will work with our customers to ensure the application update process fits their use case.
+
+==== Upgrade Process
+
+* Verify image signature
+* Extract new rootfs to unused rootfs partition
+* Modify boot.scr to boot with the alternate rootfs
+* Replace the kernel and device tree binary (if included)
+* Replace the bootloader (if necessary)
+* Reboot the system

@@ -77,6 +77,7 @@ bootstrap_script =
  apt-get update
  apt-get upgrade -y
  apt-get install -y vim
+ passwd root
 "
 File.write(".bootstrap.sh", bootstrap_script)
  `
@@ -148,3 +149,5 @@ task :install_kernel => [:kernel] do
   sh "sudo make -C #{kernel_dir} modules_install firmware_install \
       INSTALL_MOD_PATH=#{rfs_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- "
 end
+
+task :default => [:borg_install_sources, :install, :sd_card]
