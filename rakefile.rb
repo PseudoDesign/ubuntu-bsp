@@ -6,6 +6,7 @@ uboot_dir = '/home/vagrant/uboot-fslc'
 kernel_dir = '/home/vagrant/linux-fslc'
 ubuntu_rfs_dir = '/home/vagrant/ubuntu'
 install_dir = '/home/vagrant/install'
+uboot_file = 'u-boot.imx'
 
 
 binary_dir = File.join(install_dir, "binary")
@@ -17,14 +18,14 @@ PARTITION_INFO = [
   {
     partition_name: "boot",
     partition_start_sector: 2048,
-    partition_length_sectors: (1024 * 1024 * 500)/512,
+    partition_length_sectors: (1024 * 1024 * 500 / 4)/512,
     fdisk_type: "6", # FAT16
     mkfs_command: "mkfs.vfat"
   },
   {
     partition_name: "rootfs1",
-    partition_start_sector: 1028000,
-    partition_length_sectors: (1024 * 1024 * 4000)/512,
+    partition_start_sector: 280000,
+    partition_length_sectors: (1024 * 1024 * 500)/512,
     mkfs_command: "mkfs.ext3"
   }
 ]
@@ -55,7 +56,7 @@ end
 
 task :ubuntu do
   target = ubuntu_rfs_dir
-  distro = 'trusty'
+  distro = 'xenial'
   # Install stage one of our rootfs
  `
   mkdir -p #{target}
@@ -78,6 +79,7 @@ bootstrap_script =
  apt-get upgrade -y
  apt-get install -y vim
  passwd root
+ ln -s /lib/systemd/system/getty@.service getty@ttymxc0.service
 "
 File.write(".bootstrap.sh", bootstrap_script)
  `
@@ -106,7 +108,7 @@ task :sd_card do
   end
   # Write uboot
   `
-  dd conv=notrunc if=#{binary_dir}/u-boot-dtb.imx of=#{TMP_SD_FILE_NAME} bs=512 seek=2
+  dd conv=notrunc if=#{binary_dir}/#{uboot_file} of=#{TMP_SD_FILE_NAME} bs=512 seek=2
   `
   `
     mkdir -p /share/images
@@ -126,7 +128,7 @@ task :install_boot => [:uboot] do
   # TODO: Verify .bin is the correct file to load
   # Install uboot
   FileUtils.cp(
-    File.join(uboot_dir, "u-boot-dtb.imx"),
+    File.join(uboot_dir, uboot_file),
     binary_dir
   )
 end
@@ -141,7 +143,7 @@ task :install_kernel => [:kernel] do
   )
   # Install dts
   dts = File.join(kernel_dir, "arch", "arm", "boot", "dts")
-  `cp #{dts}/imx6ull-14x14-evk*.dtb #{binary_dir}`
+   `cp #{dts}/imx6ull-14x14-evk*.dtb #{binary_dir}`
   # Install headers
   sh "sudo make -C #{kernel_dir} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
   headers_install INSTALL_HDR_PATH=#{rfs_dir}/usr  "
